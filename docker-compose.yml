@@ -1,0 +1,73 @@
+version: "3"
+
+#inicializamos los servicos 
+services:
+#Iniciamos el servicio de grafana 
+  grafana:
+  #Colocamos la direccion de la imagen de grafana
+    image: grafana/grafana
+    #Le asignamos un nombre para nuestro servicio
+    container_name: grafana
+    #Le decimos que siempre se inicialice
+    restart: always
+    #Seleccionamos el puerto
+    ports:
+      - 3000:3000
+      #Seleccionamos el nombre del networks
+    networks:
+      - grafana_network
+      #Agregamos la direccion 
+    volumes:
+      - grafana_data:/var/lib/grafana
+      #Agregamos la dependencia
+    depends_on:
+      - influxdb
+  #Iniciamos el servicio Influxdb
+  influxdb:
+    #Colocamos la direccion de la imagen de grafana
+    image: influxdb:latest
+    #Le asignamos un nombre para nuestro servicio
+    container_name: influxdb
+    #Le decimos que siempre se inicialice
+    restart: always
+     #Seleccionamos el puerto
+    ports:
+      - 8086:8086
+      #Seleccionamos el nombre del networks
+    networks:
+      - grafana_network
+      #Agregamos la direccion 
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+      #Agregamos la cofiguracion de la base de datos 
+    environment:
+      - INFLUXDB_DB=grafana               #Agregamos nombre de la base de datos 
+      - INFLUXDB_USER=grafana             #Agregamos el usuario de la base de datos
+      - INFLUXDB_USER_PASSWORD=password   #Agregamos el password para el usuario
+      - INFLUXDB_ADMIN_ENABLED=true       
+      - INFLUXDB_ADMIN_USER=admin         #Agregamos el nombre para el admin
+      - INFLUXDB_ADMIN_PASSWORD=password  #Agregamos la contraseña para el administrador
+  #Iniciamos el servicios 
+  nodered:
+  #Ingresamos el nombre del servicio
+    container_name: Node-red
+    #Agregamos la direccion de la imagen del node red
+    image: nodered/node-red:latest
+    #Le decimos que siempre se inicialice
+    restart: always
+    #Le asignamos un puerto
+    ports:
+      - 1880:1880
+    #Le configuramos el networds
+    networks:
+      - grafana_network
+      #Agregamos el volumen
+    volumes:
+      - nodered_data:/var/lib/nodered
+networks:
+  grafana_network:
+  #Agregamos los volumenes de grafana, influxdb y nodered
+volumes:
+  grafana_data:
+  influxdb_data:
+  nodered_data:
